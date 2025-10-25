@@ -1,6 +1,7 @@
 mod config;
 mod cli;
 mod downloader;
+mod models;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
   let (
