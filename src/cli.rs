@@ -1,7 +1,10 @@
-use crate::downloader::fetch_links;
 use clap::{App, Arg, SubCommand};
+use std::collections::HashMap;
 
-pub fn cli() -> Result<(), Box<dyn std::error::Error>> {
+pub fn cli(
+  minor_contracts_links: HashMap<String, String>,
+  public_tenders_links: HashMap<String, String>,
+) -> Result<(), Box<dyn std::error::Error>> {
   let matches = App::new("sppd-cli")
     .version("0.1")
     .author("Alvaro Carranza <alvarocarranzacarrion@gmail.com>")
@@ -12,7 +15,7 @@ pub fn cli() -> Result<(), Box<dyn std::error::Error>> {
         .short('t')
         .long("type")
         .takes_value(true)
-        .help("Sets the type of the request: 'small' (or 's') or 'regular' (or 'r')")))
+        .help("Sets the type of the procurement: 'minor-contracts' (or 'c') or 'pubic-tenders' (or 't')")))
     .get_matches();
 
   if let Some(download_matches) = matches.subcommand_matches("download") {
@@ -26,19 +29,18 @@ pub fn cli() -> Result<(), Box<dyn std::error::Error>> {
       }
     };
 
-    // determine the input URL based on the type
+    // determine the input links based on the type
     println!("Input type: {}", input_type);
-    let input_url = match input_type {
-      "small" => "https://www.hacienda.gob.es/es-es/gobiernoabierto/datos%20abiertos/paginas/contratosmenores.aspx",
-      "regular" => "https://www.hacienda.gob.es/es-ES/GobiernoAbierto/Datos%20Abiertos/Paginas/LicitacionesContratante.aspx",
+    let links = match input_type {
+      "small" => minor_contracts_links,
+      "regular" => public_tenders_links,
       _ => {
         eprintln!("Unknown input type: {}", input_type);
         std::process::exit(1);
       }
     };
 
-    // fetch and print links
-    let links = fetch_links(input_url)?;
+    // print links
     for (period, url) in links {
       println!("Period: {}, URL: {}", period, url);
     }

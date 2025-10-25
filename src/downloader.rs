@@ -1,9 +1,18 @@
+use crate::config::*;
 use reqwest;
 use scraper::{Html, Selector};
 use url::Url;
 use regex;
+use std::collections::HashMap;
 
-pub fn fetch_links(input_url: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
+pub fn fetch_all_links() -> Result<(HashMap<String, String>, HashMap<String, String>), Box<dyn std::error::Error>> {
+  let minor_links = fetch_zip(MINOR_CONTRACTS)?;
+  let public_links = fetch_zip(PUBLIC_TENDERS)?;
+  Ok((minor_links, public_links))
+}
+
+
+pub fn fetch_zip(input_url: &str) -> Result<std::collections::HashMap<String, String>, Box<dyn std::error::Error>> {
     // parse the base URL
     let base_url = Url::parse(input_url)?;
 
