@@ -4,6 +4,10 @@ use scraper::{Html, Selector};
 use url::Url;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+  cli()
+}
+
+fn cli() -> Result<(), Box<dyn std::error::Error>> {
   let matches = App::new("sppd-cli")
     .version("0.1")
     .author("Alvaro Carranza <alvarocarranzacarrion@gmail.com>")
@@ -34,39 +38,40 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       "small" => "https://www.hacienda.gob.es/es-es/gobiernoabierto/datos%20abiertos/paginas/contratosmenores.aspx",
       "regular" => "https://www.hacienda.gob.es/es-ES/GobiernoAbierto/Datos%20Abiertos/Paginas/LicitacionesContratante.aspx",
       _ => {
-      eprintln!("Unknown input type: {}", input_type);
-      std::process::exit(1);
-      }
-    };
-
-    // parse the base URL
-    let base_url = match Url::parse(input_url) {
-      Ok(url) => url,
-      Err(_) => {
-        eprintln!("Invalid URL: {}", input_url);
+        eprintln!("Unknown input type: {}", input_type);
         std::process::exit(1);
       }
     };
 
-    // fetch the page content
-    let response = reqwest::blocking::get(base_url.as_str())?
-      .error_for_status()?
-      .text()?;
-    let document = Html::parse_document(&response);
-
-    // selector to find all links ending with .zip
-    let selector = Selector::parse(r#"a[href$=".zip"]"#).unwrap();
-
-    let links: std::collections::HashSet<String> = document
-      .select(&selector)
-      .filter_map(|el| el.value().attr("href"))
-      .filter_map(|href| base_url.join(href).ok().map(|u| u.to_string()))
-      .collect();
-
+    // fetch and print links
+    let links = fetch_links(input_url)?;
     for link in links {
       println!("{}", link);
     }
   }
 
   Ok(())
+}
+
+
+fn fetch_links(input_url: &str) -> Result<std::collections::HashSet<String>, Box<dyn std::error::Error>> {
+  // parse the base URL
+  let base_url = Url::parse(input_url)?;
+
+  // fetch the page content
+  let response = reqwest::blocking::get(base_url.as_str())?
+    .error_for_status()?
+    .text()?;
+  let document = Html::parse_document(&response);
+
+  // selector to find all links ending with .zip
+  let selector = Selector::parse(r#"a[href$=".zip"]"#).unwrap();
+
+  let links: std::collections::HashSet<String> = document
+    .select(&selector)
+    .filter_map(|el| el.value().attr("href"))
+    .filter_map(|href| base_url.join(href).ok().map(|u| u.to_string()))
+    .collect();
+
+  Ok(links)
 }
