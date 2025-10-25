@@ -1,5 +1,5 @@
 [package]
-name = "sppd-rs"
+name = "sppd-cli"
 version = "0.1.0"
 edition = "2021"
 
