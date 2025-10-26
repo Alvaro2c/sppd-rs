@@ -6,9 +6,15 @@ pub enum ProcurementType {
 impl From<&str> for ProcurementType {
     fn from(value: &str) -> Self {
         match value.to_lowercase().as_str() {
-            "mc" | "minor-contracts" | "min" => ProcurementType::MinorContracts,
-            "pt" | "pub" | "public-tenders" => ProcurementType::PublicTenders,
-            _ => ProcurementType::PublicTenders, // default fallback
+            "mc" | "minor-contracts" | "min" => Self::MinorContracts,
+            "pt" | "pub" | "public-tenders" => Self::PublicTenders,
+            _ =>{
+                eprintln!(
+                  "Unknown procurement type '{}', defaulting to 'public-tenders'",
+                value
+              );
+            Self::PublicTenders
+            }
         }
     }
 }
