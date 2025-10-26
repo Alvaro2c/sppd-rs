@@ -17,7 +17,7 @@ pub fn cli(
           Arg::new("type")
             .short('t')
             .long("type")
-            .help("Type of procurement: 'minor-contracts' (or 'mc'/'min') or 'public-tenders' (or 'pt'/'pub')")
+            .help("Procurement type: 'minor-contracts' (mc, min) or 'public-tenders' (pt, pub)")
             .default_value("public-tenders")
             .action(ArgAction::Set),
         ),
